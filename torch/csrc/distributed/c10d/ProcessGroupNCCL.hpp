@@ -319,8 +319,10 @@ class TORCH_API ProcessGroupNCCL : public Backend {
     // to the store.
     c10::intrusive_ptr<Store> store_;
 
-    // Store a reference to NCCL collective's outputs, used by result and to
-    // give a more descriptive message when representing the Work as a string.
+    // Store a reference to NCCL collective's outputs and inputs, used by
+    // result, to give a more descriptive message when representing the Work as
+    // a string, and for Flight Recorder.
+    std::shared_ptr<std::vector<at::Tensor>> inputs_;
     std::shared_ptr<std::vector<at::Tensor>> outputs_;
 
     // TORCH_NCCL_AVOID_RECORD_STREAMS implementation helper.
@@ -594,13 +596,16 @@ class TORCH_API ProcessGroupNCCL : public Backend {
   virtual std::exception_ptr checkForNCCLErrors(
       std::shared_ptr<NCCLComm>& ncclComm);
 
+  // Ensure thaht if record is True, the work obj will be enqueued via
+  // workEnqueue
   virtual c10::intrusive_ptr<ProcessGroupNCCL::WorkNCCL> initWork(
       at::Device& device,
       int rank,
       OpType opType,
       const char* profilingTitle = nullptr,
       const std::vector<at::Tensor>& inputs = {},
-      const std::vector<at::Tensor>& outputs = {});
+      const std::vector<at::Tensor>& outputs = {},
+      bool record = false);
 
  private:
   int globalRankStart;
