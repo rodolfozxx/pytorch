@@ -138,7 +138,7 @@ class GraphBuilder:
         )
 
 
-class TestLiftUnlift(TestCase):
+class TestLift(TestCase):
     def setUp(self):
         if IS_MACOS:
             raise unittest.SkipTest("non-portable load_library call used in test")
@@ -183,7 +183,7 @@ class TestLiftUnlift(TestCase):
         root = {"const_tensor": const_tensor, "const_obj": const_obj}
         gm = torch.fx.GraphModule(root, graph)
         graph_signature = builder.gen_graph_signature()
-        constants = lift_constants_pass(gm, graph_signature)
+        constants = lift_constants_pass(gm, graph_signature, {})
         gm.graph.lint()
 
         self.assertEqual(len(constants), 2)
@@ -257,7 +257,7 @@ class TestLiftUnlift(TestCase):
         graph_signature = builder.gen_graph_signature()
         gm = torch.fx.GraphModule(root, graph)
 
-        constants = lift_constants_pass(gm, graph_signature)
+        constants = lift_constants_pass(gm, graph_signature, {})
         gm.graph.lint()
 
         self.assertEqual(len(constants), 1)
@@ -328,7 +328,7 @@ class TestLiftUnlift(TestCase):
         root = {"const_tensor": const, "const_obj": const_obj, "const_obj2": const_obj}
         gm = torch.fx.GraphModule(root, graph)
 
-        constants = lift_constants_pass(gm, graph_signature)
+        constants = lift_constants_pass(gm, graph_signature, {})
         gm.graph.lint()
 
         self.assertEqual(len(constants), 2)
